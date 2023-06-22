@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
@@ -17,6 +18,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -37,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private Colorful colorful;
 
+    private Button btnShare;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,8 +57,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         txtBlueColorValue = findViewById(R.id.txtBlueColorValue);
         txtRedColorValue = findViewById(R.id.txtRedColorValue);
 
+        btnShare = findViewById(R.id.btnShare);
+
+        btnSaveThePicture.setVisibility(View.INVISIBLE);
+        btnShare.setVisibility(View.INVISIBLE);
+        redSeekBar.setVisibility(View.INVISIBLE);
+        blueSeekBar.setVisibility(View.INVISIBLE);
+        greenSeekBar.setVisibility(View.INVISIBLE);
+
+        txtRedColorValue.setVisibility(View.INVISIBLE);
+        txtBlueColorValue.setVisibility(View.INVISIBLE);
+        txtGreenColorValue.setVisibility(View.INVISIBLE);
+
+
         btnTakeThePicture.setOnClickListener(MainActivity.this);
         btnSaveThePicture.setOnClickListener(MainActivity.this);
+        btnShare.setOnClickListener(MainActivity.this);
 
 
         ColorizationHandler colorizationHandler = new ColorizationHandler();
@@ -68,7 +87,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.btnSavePicture) {
-
+            int permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+                try {
+                    SaveFile.saveFile(MainActivity.this, bitmap);
+                    Toast.makeText(this, "Image is successfully saved to external storage", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 23);
+            }
         } else if (id == R.id.btnTakePicture) {
             int permissionResult = ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA);
             if (permissionResult == PackageManager.PERMISSION_GRANTED) {
@@ -82,14 +111,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } else {
                 ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_RC);
             }
+        } else if (id == R.id.btnShare) {
+            try {
+                File myPicFile = SaveFile.saveFile(MainActivity.this, bitmap);
+                Uri myUri = Uri.fromFile(myPicFile);
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, "This picture is sent from Image app i created myself!");
+                shareIntent.putExtra(Intent.EXTRA_STREAM, myUri);
+                startActivity(Intent.createChooser(shareIntent, "Lets share your picture with others!"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+
         Toast.makeText(MainActivity.this, "OnActivityResult is called", Toast.LENGTH_LONG).show();
         if (requestCode == CAMERA_IMAGE_REQUEST_CODE && resultCode == RESULT_OK) {
+            btnSaveThePicture.setVisibility(View.VISIBLE);
+            btnShare.setVisibility(View.VISIBLE);
+            redSeekBar.setVisibility(View.VISIBLE);
+            blueSeekBar.setVisibility(View.VISIBLE);
+            greenSeekBar.setVisibility(View.VISIBLE);
+
+            txtRedColorValue.setVisibility(View.VISIBLE);
+            txtBlueColorValue.setVisibility(View.VISIBLE);
+            txtGreenColorValue.setVisibility(View.VISIBLE);
+
             Bundle bundle = data.getExtras();
             bitmap = (Bitmap) bundle.get("data");
             colorful = new Colorful(bitmap, 0.0f, 0.0f, 0.0f);
@@ -106,11 +159,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     colorful.setRedColorValue(progress / 100.0f);
                     redSeekBar.setProgress((int) (100 * (colorful.getRedColorValue())));
                     txtRedColorValue.setText(colorful.getRedColorValue() + "");
-                } if (seekBar == blueSeekBar) {
+                }
+                if (seekBar == blueSeekBar) {
                     colorful.setBlueColorValue(progress / 100.0f);
                     blueSeekBar.setProgress((int) (100 * (colorful.getBlueColorValue())));
                     txtBlueColorValue.setText(colorful.getBlueColorValue() + "");
-                } if (seekBar == greenSeekBar) {
+                }
+                if (seekBar == greenSeekBar) {
                     colorful.setGreenColorValue(progress / 100.0f);
                     greenSeekBar.setProgress((int) (100 * (colorful.getGreenColorValue())));
                     txtGreenColorValue.setText(colorful.getGreenColorValue() + "");

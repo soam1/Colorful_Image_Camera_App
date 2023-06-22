@@ -46,6 +46,7 @@
         android:layout_marginTop="36dp"
         android:max="100"
         android:progress="0"
+        android:thumbTint="#FF0000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -59,6 +60,7 @@
         android:layout_marginTop="40dp"
         android:max="100"
         android:progress="0"
+        android:thumbTint="#00ff00"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/redColorSeekBar" />
 
@@ -70,6 +72,7 @@
         android:layout_marginTop="40dp"
         android:max="100"
         android:progress="0"
+        android:thumbTint="#0000ff"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/greenColorSeekBar" />
 
@@ -102,5 +105,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/greenColorSeekBar"
         app:layout_constraintTop_toTopOf="@+id/greenColorSeekBar" />
+
+    <Button
+        android:id="@+id/btnShare"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Share"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/blueColorSeekBar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
